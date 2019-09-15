@@ -24,7 +24,14 @@ pull_config() {
     fi
 }
 
-config_in_vcs && pull_config
+if config_in_vcs; then
+    pull_config
+    cd "$config_target_prefix"
+elif [ -n "$IMAPFILTER_CONFIG_BASE" ]; then
+    cd "$IMAPFILTER_CONFIG_BASE"
+else
+    cd "${config_target%/*}"
+fi
 
 if [ ! -f "$config_target" ]; then
     printf "Config file '%s' does not exist\n" "$config_target"

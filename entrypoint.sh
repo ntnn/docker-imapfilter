@@ -51,7 +51,7 @@ imapfilter_update() {
         kill -TERM "$imapfilter_pid"
         wait "$imapfilter_pid"
     fi
-    imapfilter -c "$config_target" &
+    imapfilter -c "$config_target" -l "$IMAPFILTER_LOGFILE" &
     imapfilter_pid="$(jobs -p)"
 }
 
@@ -74,7 +74,7 @@ while true; do
         fi
     else
         printf ">>> Running imapfilter\n"
-        imapfilter -c "$config_target"
+        imapfilter -c "$config_target" -l "$IMAPFILTER_LOGFILE"
     fi
 
     printf ">>> Sleeping\n"

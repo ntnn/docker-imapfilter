@@ -11,6 +11,11 @@ else
     config_target="$IMAPFILTER_CONFIG"
 fi
 
+log_parameter=
+if [ -n "$IMAPFILTER_LOGFILE" ]; then
+	log_parameter="-l '$IMAPFILTER_LOGFILE'"
+fi
+
 updated_config=no
 pull_config() {
     updated_config=no
@@ -51,7 +56,7 @@ imapfilter_update() {
         kill -TERM "$imapfilter_pid"
         wait "$imapfilter_pid"
     fi
-    imapfilter -c "$config_target" -l "$IMAPFILTER_LOGFILE" &
+    imapfilter -c "$config_target" $log_parameter &
     imapfilter_pid="$(jobs -p)"
 }
 
@@ -74,7 +79,7 @@ while true; do
         fi
     else
         printf ">>> Running imapfilter\n"
-        imapfilter -c "$config_target" -l "$IMAPFILTER_LOGFILE"
+        imapfilter -c "$config_target" $log_parameter
     fi
 
     printf ">>> Sleeping\n"

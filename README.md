@@ -65,5 +65,6 @@ different entrypoints (`IMAPFILTER_CONFIG`).
 | `GIT_TARGET` | string | Git URI for the imapfilter config repo |
 | `IMAPFILTER_CONFIG` | string | For git-based configs the entrypoint within the repository, otherwise absolute path to config |
 | `IMAPFILTER_CONFIG_BASE` | string | If config is not git-based path to base of mounted config |
+| `IMAPFILTER_LOGFILE` | string | Optional; file name and full path to write log files to |
 | `IMAPFILTER_DAEMON` | string <yes/no> | If the imapfilter config is daemonized or not |
 | `IMAPFILTER_SLEEP` | integer | How many seconds the entrypoint should sleep between checking the git config for updated or run imapfilter |

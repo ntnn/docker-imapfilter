@@ -13,7 +13,7 @@ fi
 
 log_parameter=
 if [ -n "$IMAPFILTER_LOGFILE" ]; then
-	log_parameter="-l '$IMAPFILTER_LOGFILE'"
+	log_parameter="-l $IMAPFILTER_LOGFILE"
 fi
 
 updated_config=no

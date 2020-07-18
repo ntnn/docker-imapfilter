@@ -1,6 +1,6 @@
 # imapfilter
 
-Docker image to run imapfilter as a daemon.
+Docker image to run imapfilter as a daemon: [ntnn/imapfilter](https://hub.docker.com/r/ntnn/imapfilter)
 
 The best way to use this image is to have your imapfilter configuration
 in a git repo.

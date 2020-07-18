@@ -2,6 +2,11 @@
 name: build-docker-images
 
 on:
+  push:
+    branches:
+      - master
+    pull_request:
+      - master
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:

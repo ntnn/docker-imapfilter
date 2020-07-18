@@ -5,6 +5,16 @@ Docker image to run imapfilter as a daemon.
 The best way to use this image is to have your imapfilter configuration
 in a git repo.
 
+## Image tags
+
+The `latest` and `master` tags are always build from the master branch in
+the official [imapfilter repository](https://github.com/lefcha/imapfilter).
+
+Git tags in the official repository are built as they get live and
+tagged with their git tag.
+
+The `latest-tag` tag points to the latest git tag image.
+
 ## Example
 
 This is how I run it as a stack:

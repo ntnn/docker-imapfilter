@@ -11,9 +11,10 @@ The `latest` and `master` tags are always build from the master branch in
 the official [imapfilter repository](https://github.com/lefcha/imapfilter).
 
 Git tags in the official repository are built as they get live and
-tagged with their git tag.
+tagged with their git tag. The latest imapfilter tag is rebuilt daily
+with the current ntnn/docker-imapfilter changes.
 
-The `latest-tag` tag points to the latest git tag image.
+The `latest-tag` tag points to the latest lefcha/imapfilter tag image.
 
 ## Example
 

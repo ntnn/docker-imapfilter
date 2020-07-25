@@ -1,0 +1,33 @@
+---
+name: lefcha/imapfilter tags
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+
+  # This job builds an image from tags in the official repository.
+  # The resulsting image is tagged with the git tag and latest-tag.
+  build-imapfilter-tags:
+    runs-on: ubuntu-latest
+
+    steps:
+      - id: imapfilter-latest-tag
+        run: |
+          # Can't find an endpoint that returns the latest tag - only
+          # the latest release. And since lefcha doesn't use GitHub's
+          # release feature the tags must be used.
+          tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
+          echo "::set-output name=tag::$tag"
+      - uses: actions/checkout@v2
+      - uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          repository: ntnn/imapfilter
+          tags: ${{ steps.imapfilter-latest-tag.outputs.tag }},latest-tag

@@ -1,12 +1,9 @@
 ---
-name: build-docker-images
+name: ntnn/docker-imapfilter changes
 
 on:
   push:
-    branches:
-      - master
-    pull_request:
-      - master
+  pull_request:
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
@@ -19,41 +16,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-
-      - name: build-image-master
-        uses: docker/build-push-action@v1
+      - uses: actions/checkout@v2
+      - uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
           repository: ntnn/imapfilter
           tags: master,latest
-
-  build-tags:
-    # This job builds an image from tags in the official repository.
-    # The resulsting image is tagged with the git tag and latest-tag.
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: fetch-latest-imapfilter-tag
-        run: |
-          # Can't find an endpoint that returns the latest tag - only
-          # the latest release. And since lefcha doesn't use GitHub's
-          # release feature the tags must be used.
-          tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
-          echo "::set-output tag=$tag"
-
-      - name: fech-latest-image-tag
-        uses: tinact/docker.image-latest@master
-        with:
-          image_name: 'ntnn/imapfilter'
-
-      - name: build-image-tag
-        uses: docker/build-push-action@v1
-        if: ${{ steps.fetch-latest-imapfilter-tag.outputs.tag != steps.fetch-latest-image-tag.outputs.latest }}
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ntnn/imapfilter
-          tags: ${{ steps.fetch-latest-imapfilter-tag.outputs.tag }},latest-tag
+          # Only push when building master
+          push: ${{ github.ref == 'refs/heads/master' }}

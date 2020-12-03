@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-master:
-    # This job builds an image from the current master branch in the
+  build-main:
+    # This job builds an image from the current main branch in the
     # official repository.
-    # The resulting image is tagged with master and latest.
+    # The resulting image is tagged with main and latest.
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,5 @@ jobs:
       - uses: docker/build-push-action@v2
         with:
           tags: ntnn/imapfilter:main,ntnn/imapfilter:latest
-          # Only push when building master
-          push: ${{ github.ref == 'refs/heads/master' }}
+          # Only push when building main
+          push: ${{ github.ref == 'refs/heads/main' }}

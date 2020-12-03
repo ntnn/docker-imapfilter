@@ -7,7 +7,7 @@ in a git repo.
 
 ## Image tags
 
-The `latest` and `master` tags are always build from the master branch in
+The `latest` and `main` tags are always build from the main branch in
 the official [imapfilter repository](https://github.com/lefcha/imapfilter).
 
 Git tags in the official repository are built as they get live and

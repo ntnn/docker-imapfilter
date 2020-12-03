@@ -5,4 +5,5 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
-    schedule: weekly
+    schedule:
+      interval: weekly

@@ -4,7 +4,7 @@ name: lefcha/imapfilter tags
 on:
   push:
     branches:
-      - master
+      - main
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:

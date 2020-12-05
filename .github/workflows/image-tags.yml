@@ -25,10 +25,9 @@ jobs:
           tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
           echo "::set-output name=tag::$tag"
       - uses: actions/checkout@v2
-      - uses: docker/login-action@v1
+      - uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - uses: docker/build-push-action@v2
-        with:
-          tags: ntnn/imapfilter:${{ steps.imapfilter-latest-tag.outputs.tag }},ntnn/imapfilter:latest-tag
+          repository: ntnn/imapfilter
+          tags: ${{ steps.imapfilter-latest-tag.outputs.tag }},latest-tag

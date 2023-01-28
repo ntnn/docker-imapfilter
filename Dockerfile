@@ -20,6 +20,9 @@ COPY --from=builder /usr/local/share/imapfilter /usr/local/share/imapfilter
 COPY --from=builder /usr/local/man /usr/local/man
 
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod a+x /entrypoint.sh && apk --no-cache add lua openssl pcre git
+RUN chmod a+x /entrypoint.sh && apk --no-cache add lua lua-dev openssl pcre git \
+     && adduser -D -u 1001 imapfilter
+
+USER imapfilter
 
 ENTRYPOINT /entrypoint.sh

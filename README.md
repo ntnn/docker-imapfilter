@@ -7,18 +7,19 @@ in a git repo.
 
 ## Image tags
 
-The `latest` and `main` tags are always build from the main branch in
-the official [imapfilter repository](https://github.com/lefcha/imapfilter).
+The repository builds to versions of the image:
 
-Git tags in the official repository are built as they get live and
-tagged with their git tag. The latest imapfilter tag is rebuilt daily
-with the current ntnn/docker-imapfilter changes.
+1. The `latest`/`main` tagged version, which is always build from the
+   main branches of both [lefcha/imapfilter][imapfilter] and this
+   repository.
 
-The `latest-tag` tag points to the latest lefcha/imapfilter tag image.
+2. The `latest-tag`/`vX.Y.Z` tagged version, which is always build from
+   the main branch of this repository and the latest tag of the
+   [lefcha/imapfilter][imapfilter].
 
 ## Example
 
-This is how I run it as a stack:
+This is how it could be run as a stack:
 
 ```yaml
 ---
@@ -79,3 +80,5 @@ different entrypoints (`IMAPFILTER_CONFIG`).
 | `IMAPFILTER_LOGFILE` | string | Optional; file name and full path to write log files to |
 | `IMAPFILTER_DAEMON` | string <yes/no> | If the imapfilter config is daemonized or not |
 | `IMAPFILTER_SLEEP` | integer | How many seconds the entrypoint should sleep between checking the git config for updated or run imapfilter |
+
+[imapfilter]: https://github.com/lefcha/imapfilter

@@ -35,8 +35,7 @@ jobs:
       - name: Build from latest imapfilter master
         uses: docker/build-push-action@v4
         with:
-          repository: ntnn/imapfilter
-          tags: main,latest
+          tags: ntnn/imapfilter:main,ntnn/imapfilter:latest
           # Only push when building main
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
@@ -52,8 +51,7 @@ jobs:
       - name: Build from latest imapfilter tag
         uses: docker/build-push-action@v4
         with:
-          repository: ntnn/imapfilter
-          tags: latest-tag,${{ steps.imapfilter-latest-tag.outputs.tag }}
+          tags: ntnn/imapfilter:latest-tag,ntnn/imapfilter:${{ steps.imapfilter-latest-tag.outputs.tag }}
           # Only push when building main
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7

@@ -1,5 +1,5 @@
 ---
-name: ntnn/docker-imapfilter changes
+name: build
 
 on:
   push:
@@ -32,10 +32,18 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - id: imapfilter-latest-tag
+        run: |
+          # Can't find an endpoint that returns the latest tag - only
+          # the latest release. And since lefcha doesn't use GitHub's
+          # release feature the tags must be used.
+          tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
+          echo "::set-output name=tag::$tag"
+
       - uses: docker/build-push-action@v4
         with:
           repository: ntnn/imapfilter
-          tags: main,latest
+          tags: main,latest,${{ steps.imapfilter-latest-tag.outputs.tag }}
           # Only push when building main
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7

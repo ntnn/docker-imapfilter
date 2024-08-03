@@ -26,5 +26,7 @@ RUN chmod a+x /entrypoint.sh && apk --no-cache add lua lua-dev openssl pcre git 
     && chown imapfilter: /opt/imapfilter
 
 USER imapfilter
+# create an empty config.lua to prevent an error when running imapfilter directly
+RUN mkdir -p /home/imapfilter/.imapfilter && touch /home/imapfilter/.imapfilter/config.lua
 
 ENTRYPOINT /entrypoint.sh

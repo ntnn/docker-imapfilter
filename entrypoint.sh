@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 config_in_vcs() {
-    [ -n "$GIT_USER" ] && [ -n "$GIT_TOKEN" ] && [ -n "$GIT_TARGET" ]
+    [ -n "$GIT_TOKEN" ] && [ -n "$GIT_TARGET" ]
 }
 
 config_target_prefix="/opt/imapfilter/config"

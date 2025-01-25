@@ -81,6 +81,7 @@ different entrypoints (`IMAPFILTER_CONFIG`).
 | --- | --- | --- |
 | `GIT_USER` | string | Username for git |
 | `GIT_TOKEN` | string | Path to the file containing the secret for the `GIT_USER` |
+| `GIT_TOKEN_RAW` | string | The raw `GIT_TOKEN` to use |
 | `GIT_TARGET` | string | Git URI for the imapfilter config repo |
 | `IMAPFILTER_CONFIG` | string | For git-based configs the entrypoint within the repository, otherwise absolute path to config |
 | `IMAPFILTER_CONFIG_BASE` | string | If config is not git-based path to base of mounted config |

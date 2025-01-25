@@ -1,8 +1,35 @@
 #!/usr/bin/env sh
 
-config_in_vcs() {
-    [ -n "$GIT_TOKEN" ] && [ -n "$GIT_TARGET" ]
+vcs_token() {
+    if [ -n "$GIT_TOKEN_RAW" ]; then
+        echo "$GIT_TOKEN_RAW"
+        return
+    fi
+
+    cat "${GIT_TOKEN}"
 }
+
+vcs_uri() {
+    s="https://"
+    if [ -n "$GIT_USER" ]; then
+        # https://user:
+        s="${s}${GIT_USER}:"
+    fi
+
+    # https://user:token@"
+    token="$(vcs_token)"
+    if [ -n "$token" ]; then
+        s="${s}${token}@"
+    fi
+
+    # https://user:token@target
+    echo "${s}${GIT_TARGET}"
+}
+
+config_in_vcs() {
+    [ -n "$(vcs_token)" ] && [ -n "$GIT_TARGET" ]
+}
+
 
 config_target_prefix="/opt/imapfilter/config"
 if config_in_vcs; then
@@ -23,7 +50,8 @@ pull_config() {
         printf ">>> Config has not been cloned yet, cloning\n"
         mkdir -p "$config_target_prefix"
         updated_config=yes
-        git clone "https://$GIT_USER:$(cat $GIT_TOKEN)@$GIT_TARGET" "$config_target_prefix"
+
+        git clone "$(vcs_uri)" "$config_target_prefix"
     else
         cd "$config_target_prefix"
         printf ">>> Pulling config\n"

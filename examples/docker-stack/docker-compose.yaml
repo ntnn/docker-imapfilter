@@ -1,0 +1,26 @@
+---
+version: '3.4'
+
+secrets:
+  imapfilter-git_token:
+    external: true
+  # contains the password for the email
+  imapfilter-<email>:
+    external: true
+
+services:
+  <email>:
+    image: ntnn/imapfilter
+    environment:
+      GIT_TARGET: <git uri>
+      IMAPFILTER_CONFIG: entry_<email>.lua
+      IMAPFILTER_DAEMON: 'yes'
+      GIT_USER: <git tool user>
+      GIT_TOKEN: /secrets/imapfilter-token
+    secrets:
+      - source: imapfilter-git_token
+        target: /secrets/imapfilter-token
+      - source: imapfilter-<email>:
+        target: /secrets/imapfilter-<email>
+    deploy:
+      mode: global

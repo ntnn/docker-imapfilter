@@ -9,12 +9,13 @@ Can also be used to access an up-to-date imapfilter docker image:
 IMAPFilter 2.8.1  Copyright (c) 2001-2023 Eleftherios Chatzimparmpas
 ```
 
-The best way to use this image is to have your imapfilter configuration
-in a git repo.
+The intended way to use this image is to have your imapfilter
+configuration in a git repo, which will then be pulled in the
+entrypoint.
 
 ## Image tags
 
-The repository builds to versions of the image:
+The repository builds two versions of the image:
 
 1. The `latest`/`main` tagged version, which is always build from the
    main branches of both [lefcha/imapfilter][imapfilter] and this
@@ -22,58 +23,22 @@ The repository builds to versions of the image:
 
 2. The `latest-tag`/`vX.Y.Z` tagged version, which is always build from
    the main branch of this repository and the latest tag of the
-   [lefcha/imapfilter][imapfilter].
+   [lefcha/imapfilter][imapfilter] repository.
 
-## Example
+## Examples
 
-This is how it could be run as a stack:
+See the examples in the `examples` directory.
 
-```yaml
----
-version: '3.4'
+The `imapfilter-config` directory contains an example imapfilter
+configuration.
 
-secrets:
-  imapfilter-git_token:
-    external: true
-  # contains the password for the email
-  imapfilter-<email>:
-    external: true
+The `docker-stack` directory contains an arguably dated example for
+a docker stack.
 
-services:
-  <email>:
-    image: ntnn/imapfilter
-    environment:
-      GIT_TARGET: <git uri>
-      IMAPFILTER_CONFIG: entry_<email>.lua
-      IMAPFILTER_DAEMON: 'yes'
-      GIT_USER: <git tool user>
-      GIT_TOKEN: /secrets/imapfilter-token
-    secrets:
-      - source: imapfilter-git_token
-        target: /secrets/imapfilter-token
-      - source: imapfilter-<email>:
-        target: /secrets/imapfilter-<email>
-    deploy:
-      mode: global
-```
+The `k8s` directory contains an example for a kubernetes deployment.
 
-The imapfilter config is stored in a repository where `entry_<email>.lua` is
-the entry point, which then retrieves the passwords for the email
-address.
-
-The filtering is invoked in a function `do_<email>`, which results in
-this code running the daemonized imapfilter:
-
-```lua
-do_<email>()
-while true do
-    email.INBOX:enter_idle()
-    do_<email>()
-end
-```
-
-I suggest to use multiple instances for multiple email addresses with
-different entrypoints (`IMAPFILTER_CONFIG`).
+Both `docker-stack` and `k8s` expect the configuration from
+`imapfilter-config`.
 
 ## Environment variables
 

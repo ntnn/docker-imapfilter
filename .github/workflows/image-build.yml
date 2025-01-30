@@ -21,7 +21,7 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-latest
-            platforms: linux/amd64,linux/armv7
+            platforms: linux/amd64,linux/arm/v7
           - runner: ubuntu-24.04-arm
             platforms: linux/arm64
 

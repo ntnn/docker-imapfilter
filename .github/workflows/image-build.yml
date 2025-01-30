@@ -13,19 +13,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  # This job builds an image from the current main branch in the
-  # official repository.
-  # The resulting image is tagged with main and latest.
   build-main:
-    strategy:
-      matrix:
-        include:
-          - runner: ubuntu-latest
-            platforms: linux/amd64,linux/arm/v7
-          - runner: ubuntu-24.04-arm
-            platforms: linux/arm64
-
-    runs-on: ${{ matrix.runner }}
+    # This job builds an image from the current main branch in the
+    # official repository.
+    # The resulting image is tagged with main and latest.
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +36,7 @@ jobs:
           tags: ntnn/imapfilter:main,ntnn/imapfilter:latest
           # Only push when building main
           push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: ${{ matrix.platforms }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
 
       - id: imapfilter-latest-tag
         run: |
@@ -60,6 +52,6 @@ jobs:
           tags: ntnn/imapfilter:latest-tag,ntnn/imapfilter:${{ steps.imapfilter-latest-tag.outputs.tag }}
           # Only push when building main
           push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: ${{ matrix.platforms }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: |
             imapfilter_spec=${{ steps.imapfilter-latest-tag.outputs.tag }}

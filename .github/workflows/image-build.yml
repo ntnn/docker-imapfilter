@@ -21,15 +21,19 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-latest
-            platforms: linux/amd64,linux/armv7
+            platforms: linux/amd64,linux/arm/v7
           - runner: ubuntu-24.04-arm
-            platforms: linux/arm64
 
     runs-on: ${{ matrix.runner }}
 
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
+        # setup-qemu-action seems to have some problems on the arm
+        # runners: https://github.com/docker/setup-qemu-action/issues/69
+        # Given the issue only affect c#/dotnet, but the arm runners are
+        # more of a test for now anyway.
+        if: ${{ matrix.runner == 'ubuntu-latest' }}
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/login-action@v3

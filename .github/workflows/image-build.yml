@@ -82,7 +82,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
 
     outputs:
-      images: ${{ steps.meta.outputs.images }}
+      tags: ${{ steps.meta.outputs.tags }}
 
   push-to-docker-hub:
     needs: build

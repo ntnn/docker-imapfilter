@@ -46,7 +46,7 @@ jobs:
           tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
           echo "::set-output name=tag::$tag"
 
-      - name: imapfilter tag and docker-imapfilterm ain
+      - name: imapfilter tag and docker-imapfilter main
         uses: docker/build-push-action@v6
         with:
           tags: ntnn/imapfilter:latest-tag,ntnn/imapfilter:${{ steps.imapfilter-latest-tag.outputs.tag }}

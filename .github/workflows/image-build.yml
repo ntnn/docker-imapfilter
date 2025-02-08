@@ -33,28 +33,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - images: |
-              name=ntnn/imapfilter,enable=${{ github.repository == 'ntnn/docker-imapfilter' && github.ref == 'refs/heads/main' }}
-              name=ghcr.io/${{ github.repository }},enable=true
-            tags: |
-              type=schedule,pattern=latest,enable=${{ github.ref == 'refs/heads/main' }}
-              type=schedule,pattern=main,enable=${{ github.ref == 'refs/heads/main' }}
-              type=ref,event=branch
-              type=ref,event=pr
-              type=sha
+          - flavor: |
+              latest=false
+              suffix=
             args:
-              imapfilter_spec: master
-          - images: |
-              name=ntnn/imapfilter,enable=${{ github.repository == 'ntnn/docker-imapfilter' && github.ref == 'refs/heads/main' }}
-              name=ghcr.io/${{ github.repository }},enable=true
-            tags: |
-              type=schedule,pattern=latest,enable=${{ github.ref == 'refs/heads/main' }},suffix=-tag
-              type=schedule,pattern=main,enable=${{ github.ref == 'refs/heads/main' }},suffix=-tag
-              type=ref,event=branch,suffix=-tag
-              type=ref,event=pr,suffix=-tag
-              type=sha,suffix=-tag
-            args:
-              imapfilter_spec: ${{ needs.grab-imapfilter-latest.outputs.tag }}
+              imapfilter_spec=master
+          - flavor: |
+              latest=false
+              suffix=-tag
+            args: |
+              imapfilter_spec=${{ needs.grab-imapfilter-latest.outputs.tag }}
 
     steps:
       - uses: actions/checkout@v4
@@ -68,8 +56,16 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ${{ matrix.images }}
-          tags: ${{ matrix.tags }}
+          flavor: ${{ matrix.flavor }}
+          images: |
+            name=ntnn/imapfilter,enable=${{ github.repository == 'ntnn/docker-imapfilter' && github.ref == 'refs/heads/main' }}
+            name=ghcr.io/${{ github.repository }},enable=true
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -90,3 +86,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
+          build-args: ${{ matrix.args }}

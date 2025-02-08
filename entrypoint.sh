@@ -95,7 +95,10 @@ loop_no_daemon() {
         pull_config
 
         printf ">>> Running imapfilter\n"
-        start_imapfilter
+        if ! start_imapfilter; then
+            printf ">>> imapfilter failed\n"
+            exit 1
+        fi
 
         printf ">>> Sleeping\n"
         sleep "${IMAPFILTER_SLEEP:-30}"
@@ -112,6 +115,11 @@ loop_daemon() {
 
         printf ">>> Sleeping\n"
         sleep "${IMAPFILTER_SLEEP:-30}"
+
+        if ! kill -0 "$imapfilter_pid" 2>/dev/null; then
+            printf ">>> imapfilter daemon died, exiting\n"
+            exit 1
+        fi
     done
 }
 

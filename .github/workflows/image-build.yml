@@ -13,31 +13,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-main:
-    # This job builds an image from the current main branch in the
-    # official repository.
-    # The resulting image is tagged with main and latest.
+  grab-imapfilter-latest:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-
-      - uses: docker/login-action@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: imapfilter master and docker-imapfilterm ain
-        uses: docker/build-push-action@v6
-        with:
-          tags: ntnn/imapfilter:main,ntnn/imapfilter:latest
-          # Only push when building main
-          push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-
       - id: imapfilter-latest-tag
         run: |
           # Can't find an endpoint that returns the latest tag - only
@@ -45,13 +23,80 @@ jobs:
           # release feature the tags must be used.
           tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
           echo "::set-output name=tag::$tag"
+    outputs:
+      tag: ${{ steps.imapfilter-latest-tag.outputs.tag }}
 
-      - name: imapfilter tag and docker-imapfilter main
-        uses: docker/build-push-action@v6
+  build:
+    needs: grab-imapfilter-latest
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - images: |
+              name=ghcr.io/${{ github.repository }},enable=true
+            tags: |
+              type=schedule,pattern=latest,enable=${{ github.ref == 'refs/heads/main' }}
+              type=schedule,pattern=main,enable=${{ github.ref == 'refs/heads/main' }}
+              type=ref,event=branch
+              type=ref,event=pr
+              type=sha
+            args:
+              imapfilter_spec: master
+          - images: |
+              name=ghcr.io/${{ github.repository }},enable=true
+            tags: |
+              type=schedule,pattern=latest,enable=${{ github.ref == 'refs/heads/main' }},suffix=-tag
+              type=schedule,pattern=main,enable=${{ github.ref == 'refs/heads/main' }},suffix=-tag
+              type=ref,event=branch,suffix=-tag
+              type=ref,event=pr,suffix=-tag
+              type=sha,suffix=-tag
+            args:
+              imapfilter_spec: ${{ needs.grab-imapfilter-latest.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
         with:
-          tags: ntnn/imapfilter:latest-tag,ntnn/imapfilter:${{ steps.imapfilter-latest-tag.outputs.tag }}
-          # Only push when building main
-          push: ${{ github.ref == 'refs/heads/main' }}
+          # Spurious segfaults when compiling
+          # https://github.com/docker/setup-qemu-action/issues/188
+          image: tonistiigi/binfmt:qemu-v8.1.5
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ matrix.images }}
+          tags: ${{ matrix.tags }}
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          tags: ${{ steps.meta.outputs.tags }}
+          push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          build-args: |
-            imapfilter_spec=${{ steps.imapfilter-latest-tag.outputs.tag }}
+
+    outputs:
+      images: ${{ steps.meta.outputs.images }}
+
+  push-to-docker-hub:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'ntnn/docker-imapfilter' && github.ref == 'refs/heads/main' }}
+
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - run: |
+          for tag in ${{ needs.build.outputs.tags }}; do
+            version="${tag##*:}"
+            docker tag "$tag" "ntnn/imapfilter:$version"
+            docker push "ntnn/imapfilter:$version"
+          done

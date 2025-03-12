@@ -45,11 +45,6 @@ case "$config_target" in
     (/*) config_target="${config_target#${config_target_base}/}";;
 esac
 
-if ! [ -f "$config_target_base/$config_target" ]; then
-    echo "The combination of IMAPFILTER_CONFIG_BASE and IMAPFILTER_CONFIG does not point to a valid file: '$config_target_base/$config_target'"
-    exit 1
-fi
-
 pull_config() {
     config_in_vcs || return
 
@@ -75,6 +70,12 @@ pull_config() {
 start_imapfilter() {
     # enter a subshell to not affect the pwd of the running process
     (
+        if ! [ -d "$config_target_base" ]; then
+            echo "The directory '$config_target_base' does not exist, exiting"
+            echo "Please validate IMAPFILTER_CONFIG_BASE"
+            exit 1
+        fi
+
         # Enter the basedir of the config. Required to allow relative
         # includes in the lua scripts.
         cd "$config_target_base"
@@ -82,6 +83,12 @@ start_imapfilter() {
         log_parameter=
         if [ -n "$IMAPFILTER_LOGFILE" ]; then
                 log_parameter="-l $IMAPFILTER_LOGFILE"
+        fi
+
+        if ! [ -f "$config_target" ]; then
+            echo "The file '$config_target' does not exist relative to '$config_target_base', exiting"
+            echo "Please validate IMAPFILTER_CONFIG"
+            exit 1
         fi
 
         imapfilter -c "$config_target" $log_parameter

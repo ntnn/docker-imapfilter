@@ -6,7 +6,11 @@ vcs_token() {
         return
     fi
 
-    cat "${GIT_TOKEN}"
+    if [ -n "$GIT_TOKEN" ]; then
+        cat "${GIT_TOKEN}"
+    fi
+
+    return 1
 }
 
 vcs_uri() {

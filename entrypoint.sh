@@ -34,24 +34,33 @@ config_in_vcs() {
     [ -n "$(vcs_token)" ] && [ -n "$GIT_TARGET" ]
 }
 
-config_target_prefix="/opt/imapfilter/config"
-if config_in_vcs; then
-    config_target="$config_target_prefix/$IMAPFILTER_CONFIG"
-else
-    config_target="$IMAPFILTER_CONFIG"
+config_target_base="${IMAPFILTER_CONFIG_BASE:-/opt/imapfilter/config}"
+config_target="${IMAPFILTER_CONFIG}"
+
+# If config_target is an absolute path strip the base.
+# Originally IMAPFILTER_CONFIG was allowed to be absolute and relative,
+# this handles the former absolute path (as long as
+# IMAPFILTER_CONFIG_BASE is correctly used).
+case "$config_target" in
+    (/*) config_target="${config_target#${config_target_base}/}";;
+esac
+
+if ! [ -f "$config_target_base/$config_target" ]; then
+    echo "The combination of IMAPFILTER_CONFIG_BASE and IMAPFILTER_CONFIG does not point to a valid file: '$config_target_base/$config_target'"
+    exit 1
 fi
 
 pull_config() {
     config_in_vcs || return
 
     printf ">>> Updating config\n"
-    if [ ! -d "$config_target_prefix" ]; then
+    if [ ! -d "$config_target_base" ]; then
         printf ">>> Config has not been cloned yet, cloning\n"
-        mkdir -p "$config_target_prefix"
-        git clone "$(vcs_uri)" "$config_target_prefix"
+        mkdir -p "$config_target_base"
+        git clone "$(vcs_uri)" "$config_target_base"
         return
     else
-        cd "$config_target_prefix"
+        cd "$config_target_base"
         printf ">>> Pulling config\n"
         git remote update
         if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
@@ -68,18 +77,13 @@ start_imapfilter() {
     (
         # Enter the basedir of the config. Required to allow relative
         # includes in the lua scripts.
-        if config_in_vcs; then
-            cd "$config_target_prefix"
-        elif [ -n "$IMAPFILTER_CONFIG_BASE" ]; then
-            cd "$IMAPFILTER_CONFIG_BASE"
-        else
-            cd "${config_target%/*}"
-        fi
+        cd "$config_target_base"
 
         log_parameter=
         if [ -n "$IMAPFILTER_LOGFILE" ]; then
                 log_parameter="-l $IMAPFILTER_LOGFILE"
         fi
+
         imapfilter -c "$config_target" $log_parameter
     )
 }
@@ -128,11 +132,6 @@ loop_daemon() {
 }
 
 pull_config
-if [ ! -f "$config_target" ]; then
-    printf "Config file '%s' does not exist\n" "$config_target"
-    exit 1
-fi
-
 if [ "$IMAPFILTER_DAEMON" = "yes" ]; then
     loop_daemon
 else

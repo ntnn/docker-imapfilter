@@ -48,7 +48,7 @@ Both `docker-stack` and `k8s` expect the configuration from
 | `GIT_TOKEN` | string | Path to the file containing the secret for the `GIT_USER` |
 | `GIT_TOKEN_RAW` | string | The raw `GIT_TOKEN` to use |
 | `GIT_TARGET` | string | Git URI for the imapfilter config repo |
-| `IMAPFILTER_CONFIG` | string | For git-based configs the entrypoint within the repository, otherwise absolute path to config |
+| `IMAPFILTER_CONFIG` | string | The path of the imapfilter config relative to `IMAPFILTER_CONFIG_BASE` |
 | `IMAPFILTER_CONFIG_BASE` | string | If config is not git-based path to base of mounted config |
 | `IMAPFILTER_LOGFILE` | string | Optional; file name and full path to write log files to |
 | `IMAPFILTER_DAEMON` | string <yes/no> | If the imapfilter config is daemonized or not |

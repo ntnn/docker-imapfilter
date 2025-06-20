@@ -1,4 +1,4 @@
-FROM alpine as builder
+FROM alpine@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715 as builder
 
 # imapfilter_spec can be a specific commit or a version tag
 ARG imapfilter_spec=master
@@ -13,7 +13,7 @@ RUN apk --no-cache add lua openssl pcre git \
     && git checkout "${imapfilter_spec}" \
     && make && make install
 
-FROM alpine
+FROM alpine@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715
 
 COPY --from=builder /usr/local/bin/imapfilter /usr/local/bin/imapfilter
 COPY --from=builder /usr/local/share/imapfilter /usr/local/share/imapfilter

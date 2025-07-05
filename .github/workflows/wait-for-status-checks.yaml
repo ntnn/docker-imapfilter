@@ -3,24 +3,20 @@ name: wait-for-status-checks
 on:
   pull_request:  {}
 
+permissions: {}
+
 jobs:
   # Branch protection rules can enforce that status checks must pass
   # before merging - however it requires to name each check explicitly
   # in the configuration. It is no longer possible to require all
   # checks.
   # This job waits for all checks to complete, so it can be set as
-  # _thre_ required check in the branch protection rules.
+  # _the_ required check in the branch protection rules.
   wait-for-status-checks:
     runs-on: ubuntu-latest
     permissions:
       checks: read
     steps:
-      - name: GitHub Checks
-        uses: poseidon/wait-for-status-checks@899c768d191b56eef585c18f8558da19e1f3e707 # v0.6.0
+      - uses: poseidon/wait-for-status-checks@899c768d191b56eef585c18f8558da19e1f3e707 # v0.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          # CodeQL intially comes back with a neutral status, which
-          # causes wait-for-status-checks to fail:
-          # https://github.com/poseidon/wait-for-status-checks/issues/420
-          # https://github.com/poseidon/wait-for-status-checks/pull/445
-          ignore:  'CodeQL'

@@ -32,7 +32,7 @@ jobs:
           # the latest release. And since lefcha doesn't use GitHub's
           # release feature the tags must be used.
           tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
-          echo "::set-output name=tag::$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
     outputs:
       tag: ${{ steps.imapfilter-latest-tag.outputs.tag }}
 

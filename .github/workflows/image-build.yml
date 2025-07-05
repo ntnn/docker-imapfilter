@@ -13,7 +13,17 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
   grab-imapfilter-latest:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - id: imapfilter-latest-tag
@@ -22,7 +32,7 @@ jobs:
           # the latest release. And since lefcha doesn't use GitHub's
           # release feature the tags must be used.
           tag="$(curl --location --silent https://api.github.com/repos/lefcha/imapfilter/tags | jq -r '.[].name' | head -1)"
-          echo "::set-output name=tag::$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
     outputs:
       tag: ${{ steps.imapfilter-latest-tag.outputs.tag }}
 

@@ -16,19 +16,21 @@ RUN apk --no-cache add lua openssl pcre git \
 
 FROM alpine@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1
 
-# create an empty config.lua to prevent an error when running imapfilter directly
-RUN adduser -D -u 1001 imapfilter \
-    && mkdir -p /home/imapfilter/.imapfilter && touch /home/imapfilter/.imapfilter/config.lua \
+# Install runtime dependencies for imapfilter and the required tools for user management (shadow for 'su').
+RUN apk --no-cache add lua lua-dev openssl pcre git shadow \
     && mkdir -p /opt/imapfilter/config \
-    && chown imapfilter: /opt/imapfilter
+    && mkdir -p /home/imapfilter/.imapfilter && touch /home/imapfilter/.imapfilter/config.lua 
 
 COPY --from=builder /usr/local/bin/imapfilter /usr/local/bin/imapfilter
 COPY --from=builder /usr/local/share/imapfilter /usr/local/share/imapfilter
 COPY --from=builder /usr/local/man /usr/local/man
 
-RUN apk --no-cache add lua lua-dev openssl pcre git
+# Copy the application logic script
+COPY --chmod=a+x run-imapfilter.sh /run-imapfilter.sh
+# Copy the entrypoint script
+COPY --chmod=a+x entrypoint.sh /entrypoint.sh
 
-COPY --chown=imapfilter: --chmod=a+x entrypoint.sh /entrypoint.sh
-
-USER imapfilter
-ENTRYPOINT ["/entrypoint.sh"]
+# Set the USER to root so we can execute the user setup and then switch users.
+USER root
+# The primary ENTRYPOINT is the user setup script.
+ENTRYPOINT ["/docker-entrypoint.sh"]

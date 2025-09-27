@@ -2,32 +2,48 @@
 
 vcs_token() {
     if [ -n "$GIT_TOKEN_RAW" ]; then
-        echo "$GIT_TOKEN_RAW"
+        # NEW: Clean the token variable
+        echo "$GIT_TOKEN_RAW" | tr -d '[:space:]'
         return
     fi
 
     if [ -n "$GIT_TOKEN" ]; then
-        cat "${GIT_TOKEN}"
+        # NEW: Read the secret file, pipe to tr to strip ALL whitespace (including newlines)
+        cat "${GIT_TOKEN}" | tr -d '[:space:]'
+        return
     fi
 
     return 1
 }
 
 vcs_uri() {
-    s="https://"
+    s="https://" # Default protocol prefix
+
+    # 1. Add Auth details to $s: [https://] + [user:token@]
     if [ -n "$GIT_USER" ]; then
-        # https://user:
         s="${s}${GIT_USER}:"
     fi
 
-    # https://user:token@"
+    # Token is cleaned here (in vcs_token)
     token="$(vcs_token)"
     if [ -n "$token" ]; then
         s="${s}${token}@"
     fi
 
-    # https://user:token@target
-    echo "${s}${GIT_TARGET}"
+    # 2. Strip protocol from $GIT_TARGET if one exists
+    local target_clean="$GIT_TARGET"
+    
+    # Check if $GIT_TARGET starts with any protocol followed by '://'
+    case "$GIT_TARGET" in
+        *://*)
+            # Remove the protocol prefix from the target
+            target_clean="${GIT_TARGET#*://}"
+            ;;
+    esac
+
+    # 3. Final URI is returned
+    # [https://user:token@] + [clean target]
+    echo "${s}${target_clean}"
 }
 
 config_in_vcs() {
@@ -46,33 +62,49 @@ case "$config_target" in
 esac
 
 pull_config() {
-    config_in_vcs || return
-
-    printf ">>> Updating config\n"
-    if [ ! -d "$config_target_base" ]; then
-        printf ">>> Config has not been cloned yet, cloning\n"
-        mkdir -p "$config_target_base"
-        git clone "$(vcs_uri)" "$config_target_base"
-        return
-    else
-        cd "$config_target_base"
-        printf ">>> Pulling config\n"
-        git remote update
-        if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
-            git pull
-            return
-        fi
-        cd -
+    # If GIT_TARGET is not defined, we skip VCS operations
+    if ! config_in_vcs; then
+        return 0
     fi
-    return 1
+
+    vcs_url="$(vcs_uri)"
+    
+    printf ">>> INFO: Checking for config updates...\n"
+    
+    # Run the git command, capture its output and status code
+    # NOTE: --verbose is added to aid in troubleshooting future issues
+    if git -C "$config_target_base" pull --ff-only --verbose "$vcs_url" 2>&1 ; then
+        # On success, Git will print 'Already up to date.' or transfer details.
+        return 0
+    else
+        # Git failed.
+        printf ">>> ERROR: Configuration pull failed! Attempting initial clone...\n" >&2
+        
+        # If the failure was due to initial clone, try clone instead of pull
+        if ! [ -d "$config_target_base/.git" ]; then
+            
+            # The clone command, also run with verbose output
+            if git clone --verbose "$vcs_url" "$config_target_base" 2>&1 ; then
+                printf ">>> INFO: Initial config clone succeeded.\n" >&2
+                return 0
+            else
+                printf ">>> FATAL: Initial config clone failed. Check credentials/URL.\n" >&2
+                # Since the configuration is missing, we must exit the script.
+                exit 1
+            fi
+        fi
+        
+        # If it failed a pull, and it IS a repo, we return an error.
+        return 1
+    fi
 }
 
 start_imapfilter() {
     # enter a subshell to not affect the pwd of the running process
     (
         if ! [ -d "$config_target_base" ]; then
-            echo "The directory '$config_target_base' does not exist, exiting"
-            echo "Please validate IMAPFILTER_CONFIG_BASE"
+            echo ">>> The directory '$config_target_base' does not exist, exiting"
+            echo ">>> Please validate IMAPFILTER_CONFIG_BASE"
             exit 1
         fi
 
@@ -86,8 +118,8 @@ start_imapfilter() {
         fi
 
         if ! [ -f "$config_target" ]; then
-            echo "The file '$config_target' does not exist relative to '$config_target_base', exiting"
-            echo "Please validate IMAPFILTER_CONFIG"
+            echo ">>> The file '$config_target' does not exist relative to '$config_target_base', exiting"
+            echo ">>> Please validate IMAPFILTER_CONFIG"
             exit 1
         fi
 

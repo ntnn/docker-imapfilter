@@ -44,6 +44,8 @@ Both `docker-stack` and `k8s` expect the configuration from
 
 | Environment variable | Type | Description |
 | --- | --- | --- |
+| `PUID` | string | Process User ID, UID that imapfilter runs as |
+| `PGID` | string | Process Group ID, GID that imapfilter runs as |
 | `GIT_USER` | string | Username for git |
 | `GIT_TOKEN` | string | Path to the file containing the secret for the `GIT_USER` |
 | `GIT_TOKEN_RAW` | string | The raw `GIT_TOKEN` to use |

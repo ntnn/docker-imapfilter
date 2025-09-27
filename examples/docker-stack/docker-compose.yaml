@@ -12,6 +12,8 @@ services:
   <email>:
     image: ntnn/imapfilter
     environment:
+      PUID: 1001
+      PGID: 1001
       GIT_TARGET: <git uri>
       IMAPFILTER_CONFIG: entry_<email>.lua
       IMAPFILTER_DAEMON: 'yes'

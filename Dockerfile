@@ -28,7 +28,7 @@ COPY --from=builder /usr/local/man /usr/local/man
 # Copy the application logic script
 COPY --chmod=a+x run-imapfilter.sh /run-imapfilter.sh
 # Copy the entrypoint script
-COPY --chmod=a+x entrypoint.sh /entrypoint.sh
+COPY --chmod=a+x docker-entrypoint.sh /docker-entrypoint.sh
 
 # Set the USER to root so we can execute the user setup and then switch users.
 USER root

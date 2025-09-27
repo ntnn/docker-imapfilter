@@ -33,4 +33,4 @@ COPY --chmod=a+x entrypoint.sh /entrypoint.sh
 # Set the USER to root so we can execute the user setup and then switch users.
 USER root
 # The primary ENTRYPOINT is the user setup script.
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

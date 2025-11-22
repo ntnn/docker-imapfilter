@@ -13,8 +13,20 @@ vcs_token() {
     return 1
 }
 
+vcs_target_protocol() {
+    # https://a.b.c/
+    # -> https
+    echo "${GIT_TARGET%%://*}"
+}
+
+vcs_target_base() {
+    # https://a.b.c/
+    # -> a.b.c/
+    echo "${GIT_TARGET##*://}"
+}
+
 vcs_uri() {
-    s="https://"
+    s="$(vcs_target_protocol)://"
     if [ -n "$GIT_USER" ]; then
         # https://user
         s="${s}${GIT_USER}"
@@ -45,7 +57,7 @@ vcs_uri() {
     # no user - no token https://target
     # no user - token    https://user:token@target
     # user - no token    https://user@target
-    echo "${s}${GIT_TARGET}"
+    echo "${s}$(vcs_target_base)"
 }
 
 config_in_vcs() {

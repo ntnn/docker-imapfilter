@@ -1,0 +1,30 @@
+# This docker-compose is for development and testing.
+# For production use please check
+# ./examples/docker-stack/docker-compose.yaml
+
+networks:
+  imapfilter:
+    driver: bridge
+
+services:
+
+  imapmemserver:
+    build:
+      context: .
+      dockerfile: imapmemserver.Dockerfile
+    command: -listen 0.0.0.0:143 -insecure-auth
+    networks:
+      - imapfilter
+
+  imapfilter:
+    depends_on:
+      - imapmemserver
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - imapfilter
+    volumes:
+      - ./examples/imapfilter-config/config.lua:/config.lua
+    environment:
+      IMAPFILTER_CONFIG: /config.lua

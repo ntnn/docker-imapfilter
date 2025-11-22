@@ -13,21 +13,51 @@ vcs_token() {
     return 1
 }
 
+vcs_target_protocol() {
+    # https://a.b.c/
+    # -> https
+    echo "${GIT_TARGET%%://*}"
+}
+
+vcs_target_base() {
+    # https://a.b.c/
+    # -> a.b.c/
+    echo "${GIT_TARGET##*://}"
+}
+
 vcs_uri() {
-    s="https://"
+    s="$(vcs_target_protocol)://"
     if [ -n "$GIT_USER" ]; then
-        # https://user:
-        s="${s}${GIT_USER}:"
+        # https://user
+        s="${s}${GIT_USER}"
     fi
 
-    # https://user:token@"
     token="$(vcs_token)"
-    if [ -n "$token" ]; then
-        s="${s}${token}@"
+
+    # no user -         https://
+    # no user - token   https://user:
+    # user - no token   https://user
+    if [ -n "$GIT_USER" ] && [ -n "$token" ]; then
+        s="${s}:"
     fi
 
-    # https://user:token@target
-    echo "${s}${GIT_TARGET}"
+    # no user - token   https://user:token
+    # user - no token   https://user
+    if [ -n "$token" ]; then
+        s="${s}${token}"
+    fi
+
+    # no user - no token https://
+    # no user - token    https://user:token@
+    # user - no token    https://user@
+    if [ -n "$GIT_USER" ] || [ -n "$token" ]; then
+        s="${s}@"
+    fi
+
+    # no user - no token https://target
+    # no user - token    https://user:token@target
+    # user - no token    https://user@target
+    echo "${s}$(vcs_target_base)"
 }
 
 config_in_vcs() {
@@ -49,7 +79,7 @@ pull_config() {
     config_in_vcs || return
 
     printf ">>> Updating config\n"
-    if [ ! -d "$config_target_base" ]; then
+    if [ ! -d "$config_target_base/.git" ]; then
         printf ">>> Config has not been cloned yet, cloning\n"
         mkdir -p "$config_target_base"
         git clone "$(vcs_uri)" "$config_target_base"

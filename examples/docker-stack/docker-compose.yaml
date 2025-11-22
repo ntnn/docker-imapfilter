@@ -1,26 +1,59 @@
----
-version: '3.4'
-
+# For details on handling secrets in docker swam/compose please refer to
+# the official documentation:
+# Compose: https://docs.docker.com/compose/how-tos/use-secrets/
+# Swarm: https://docs.docker.com/engine/swarm/secrets/
 secrets:
-  imapfilter-git_token:
+  git-token:
     external: true
   # contains the password for the email
-  imapfilter-<email>:
+  email-password:
     external: true
 
 services:
-  <email>:
+
+  # This config pulls a git repository containing the imapfilter configs
+  # and runs imapfilter in daemon mode.
+  # Note that this depends highly on your environment, git server and
+  # how you authenticate with your git server. YMMV.
+  imapfilter-git:
     image: ntnn/imapfilter
     environment:
-      GIT_TARGET: <git uri>
-      IMAPFILTER_CONFIG: entry_<email>.lua
+      GIT_TARGET: https://my.git.repo/imapfilter-configs.git
+      # The name of your main imapfilter config file, relative to the
+      # repository root.
+      IMAPFILTER_CONFIG: config.lua
       IMAPFILTER_DAEMON: 'yes'
-      GIT_USER: <git tool user>
-      GIT_TOKEN: /secrets/imapfilter-token
+      GIT_USER: my_git_user
+      GIT_TOKEN: /secrets/git-token
     secrets:
-      - source: imapfilter-git_token
-        target: /secrets/imapfilter-token
-      - source: imapfilter-<email>:
-        target: /secrets/imapfilter-<email>
+      - source: git-token
+        target: /secrets/git-token
+      # This assumes that your config.lua reads the email password from
+      # /secrets/email-password
+      - source: email-password
+        target: /secrets/email-password
+    deploy:
+      mode: global
+
+    # This config mounts a local directory containing the imapfilter
+    # configs and runs imapfilter in daemon mode.
+  imapfilter-mounted:
+    image: ntnn/imapfilter
+    environment:
+      # Where the entrypoint should look for the configs. This is
+      # important for relative imports in your imapfilter config files.
+      IMAPFILTER_CONFIG_BASE: /configs
+      # The name of your main imapfilter config file.
+      IMAPFILTER_CONFIG: config.lua
+      IMAPFILTER_DAEMON: 'yes'
+    secrets:
+      # This assumes that your config.lua reads the email password from
+      # /secrets/email-password
+      - source: email-password
+        target: /secrets/email-password
+    volumes:
+      # Mount your local config directory here. The right side must be
+      # what IMAPFILTER_CONFIG_BASE is set to.
+      - /path/to/your/local/configs:/configs
     deploy:
       mode: global

@@ -49,7 +49,7 @@ pull_config() {
     config_in_vcs || return
 
     printf ">>> Updating config\n"
-    if [ ! -d "$config_target_base" ]; then
+    if [ ! -d "$config_target_base/.git" ]; then
         printf ">>> Config has not been cloned yet, cloning\n"
         mkdir -p "$config_target_base"
         git clone "$(vcs_uri)" "$config_target_base"

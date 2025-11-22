@@ -16,17 +16,35 @@ vcs_token() {
 vcs_uri() {
     s="https://"
     if [ -n "$GIT_USER" ]; then
-        # https://user:
-        s="${s}${GIT_USER}:"
+        # https://user
+        s="${s}${GIT_USER}"
     fi
 
-    # https://user:token@"
     token="$(vcs_token)"
-    if [ -n "$token" ]; then
-        s="${s}${token}@"
+
+    # no user -         https://
+    # no user - token   https://user:
+    # user - no token   https://user
+    if [ -n "$GIT_USER" ] && [ -n "$token" ]; then
+        s="${s}:"
     fi
 
-    # https://user:token@target
+    # no user - token   https://user:token
+    # user - no token   https://user
+    if [ -n "$token" ]; then
+        s="${s}${token}"
+    fi
+
+    # no user - no token https://
+    # no user - token    https://user:token@
+    # user - no token    https://user@
+    if [ -n "$GIT_USER" ] || [ -n "$token" ]; then
+        s="${s}@"
+    fi
+
+    # no user - no token https://target
+    # no user - token    https://user:token@target
+    # user - no token    https://user@target
     echo "${s}${GIT_TARGET}"
 }
 

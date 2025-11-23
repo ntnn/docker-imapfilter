@@ -97,3 +97,10 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: ${{ matrix.args }}
+
+      - uses: peter-evans/dockerhub-description@v5
+        if: ${{ github.repository == 'ntnn/docker-imapfilter' && github.ref == 'refs/heads/main' }}
+        with:
+          repository: ntnn/imapfilter
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}

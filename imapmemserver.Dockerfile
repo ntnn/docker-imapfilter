@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
     GOARCH=$TARGETARCH \
     go build -o imapmemserver github.com/emersion/go-imap/v2/cmd/imapmemserver
 
-FROM gcr.io/distroless/static:nonroot@sha256:f9f84bd968430d7d35e8e6d55c40efb0b980829ec42920a49e60e65eac0d83fc
+FROM gcr.io/distroless/static:nonroot@sha256:01e550fdb7ab79ee7be5ff440a563a58f1fd000ad9e0c532e65c3d23f917f1c5
 WORKDIR /
 COPY --from=builder /workspace/imapmemserver .
 USER 65532:65532

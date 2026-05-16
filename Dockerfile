@@ -20,7 +20,7 @@ FROM alpine@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afd
 RUN adduser -D -u 1001 imapfilter \
     && mkdir -p /home/imapfilter/.imapfilter && touch /home/imapfilter/.imapfilter/config.lua \
     && mkdir -p /opt/imapfilter/config \
-    && chown imapfilter: /opt/imapfilter
+    && chown -R imapfilter: /opt/imapfilter
 
 COPY --from=builder /usr/local/bin/imapfilter /usr/local/bin/imapfilter
 COPY --from=builder /usr/local/share/imapfilter /usr/local/share/imapfilter

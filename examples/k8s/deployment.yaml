@@ -30,7 +30,7 @@ spec:
             - name: IMAPFILTER_DAEMON
               value: yes
           envFrom:
-            # This assumes a secret with one key GIT_TOKEN
+            # This assumes a secret with one key GIT_TOKEN_RAW
             - secretRef:
                 name: git-token
             # This assumes a secret with one key that is read by the config.lua

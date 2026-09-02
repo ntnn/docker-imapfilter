@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.27@sha256:192b74998e350966280a2cbffbb6c40064754f7ec005096aa64f04d7ece4467e AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27@sha256:7543a96ce82c8e9003cae079ee3e0bc5b7799df8eed2a041e403af0d31fa4e67 AS builder
 
 WORKDIR /workspace
 

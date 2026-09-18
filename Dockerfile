@@ -1,4 +1,4 @@
-FROM alpine@sha256:e7c4abb69531cb09e2a2bbb56fad3367ab694865c49df898c1c683185cc4376c AS builder
+FROM alpine@sha256:5b02b42e375f7426f8d65c3af331ca05d9878f9989230354504e0b9dfd431f60 AS builder
 
 # imapfilter_spec can be a specific commit or a version tag
 ARG imapfilter_spec=master
@@ -14,7 +14,7 @@ RUN apk --no-cache add lua openssl pcre git \
     && git checkout "${imapfilter_spec}" \
     && make && make install
 
-FROM alpine@sha256:e7c4abb69531cb09e2a2bbb56fad3367ab694865c49df898c1c683185cc4376c
+FROM alpine@sha256:5b02b42e375f7426f8d65c3af331ca05d9878f9989230354504e0b9dfd431f60
 
 # create an empty config.lua to prevent an error when running imapfilter directly
 RUN adduser -D -u 1001 imapfilter \

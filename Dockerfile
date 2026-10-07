@@ -30,5 +30,5 @@ RUN apk --no-cache add lua lua-dev openssl pcre git
 
 COPY --chown=imapfilter: --chmod=a+x entrypoint.sh /entrypoint.sh
 
-USER imapfilter
+USER 1001
 ENTRYPOINT ["/entrypoint.sh"]

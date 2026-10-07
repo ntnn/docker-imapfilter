@@ -1,0 +1,7 @@
+# missing config base fails before starting imapfilter
+env IMAPFILTER_CONFIG=config.lua
+env IMAPFILTER_CONFIG_BASE=$WORK/nonexistent
+! exec sh $ENTRYPOINT
+stdout 'The directory ''.*/nonexistent'' does not exist, exiting'
+stdout '>>> imapfilter failed'
+! exists imapfilter.log

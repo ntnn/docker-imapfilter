@@ -1,0 +1,12 @@
+# config is cloned into the config base on first run
+env IMAPFILTER_CONFIG_BASE=$WORK/clone
+env IMAPFILTER_CONFIG=config.lua
+env FAKE_IMAPFILTER_MODE=exit1
+gitserve upstream
+! exec sh $ENTRYPOINT
+stdout '>>> Config has not been cloned yet, cloning'
+cmp clone/config.lua upstream/config.lua
+grep '^start pid=\d+ cwd='${WORK@R}'/clone ' imapfilter.log
+
+-- upstream/config.lua --
+-- initial

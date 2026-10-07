@@ -1,0 +1,9 @@
+# dying imapfilter daemon ends the entrypoint
+env IMAPFILTER_DAEMON=yes
+env IMAPFILTER_CONFIG=config.lua
+env FAKE_IMAPFILTER_MODE=exit1
+! exec sh $ENTRYPOINT
+stdout '>>> imapfilter daemon died, exiting'
+grep -count=1 '^start ' imapfilter.log
+
+-- config/config.lua --

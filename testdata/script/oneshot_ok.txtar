@@ -1,0 +1,10 @@
+# imapfilter runs in the config base and reruns after sleeping
+env IMAPFILTER_CONFIG=config.lua
+env IMAPFILTER_LOGFILE=out.log
+! exec sh $ENTRYPOINT &ep&
+waitfor imapfilter.log '^start ' 2
+kill -KILL ep
+wait ep
+grep -count=2 '^start pid=\d+ cwd='${WORK@R}'/config config=config.lua log=out.log$' imapfilter.log
+
+-- config/config.lua --

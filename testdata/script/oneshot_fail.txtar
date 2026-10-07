@@ -1,0 +1,8 @@
+# failing imapfilter ends the entrypoint
+env IMAPFILTER_CONFIG=config.lua
+env FAKE_IMAPFILTER_MODE=exit1
+! exec sh $ENTRYPOINT
+stdout '>>> imapfilter failed'
+grep -count=1 '^start ' imapfilter.log
+
+-- config/config.lua --

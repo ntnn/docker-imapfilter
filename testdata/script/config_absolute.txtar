@@ -1,0 +1,7 @@
+# absolute config path is made relative to the config base
+env IMAPFILTER_CONFIG=$WORK/config/config.lua
+env FAKE_IMAPFILTER_MODE=exit1
+! exec sh $ENTRYPOINT
+grep ' config=config.lua ' imapfilter.log
+
+-- config/config.lua --

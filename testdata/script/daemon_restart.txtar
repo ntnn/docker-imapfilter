@@ -1,0 +1,28 @@
+# daemon starts from the cloned config
+env IMAPFILTER_DAEMON=yes
+env IMAPFILTER_CONFIG_BASE=$WORK/clone
+env IMAPFILTER_CONFIG=config.lua
+env FAKE_IMAPFILTER_MODE=block
+gitserve upstream
+! exec sh $ENTRYPOINT &ep&
+waitfor imapfilter.log '^start ' 1
+alive 1
+
+# config change terminates and reaps the old daemon before starting a new one
+cp updated.lua upstream/config.lua
+gitcommit upstream
+waitfor imapfilter.log '^start ' 2
+grep -count=1 '^term ' imapfilter.log
+! alive 1
+alive 2
+cmp clone/config.lua updated.lua
+
+# shutdown
+kill -KILL ep
+wait ep
+stdout '>>> Update in VCS, restarting imapfilter daemon'
+
+-- upstream/config.lua --
+-- initial
+-- updated.lua --
+-- updated

@@ -1,0 +1,8 @@
+# missing config file fails before starting imapfilter
+env IMAPFILTER_CONFIG=missing.lua
+! exec sh $ENTRYPOINT
+stdout 'The file ''missing.lua'' does not exist relative to'
+stdout '>>> imapfilter failed'
+! exists imapfilter.log
+
+-- config/config.lua --

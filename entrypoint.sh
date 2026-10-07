@@ -98,31 +98,28 @@ pull_config() {
 }
 
 start_imapfilter() {
-    # enter a subshell to not affect the pwd of the running process
+    if ! [ -d "$config_target_base" ]; then
+        echo "The directory '$config_target_base' does not exist, exiting"
+        echo "Please validate IMAPFILTER_CONFIG_BASE"
+        return 1
+    fi
+
+    if ! [ -f "$config_target_base/$config_target" ]; then
+        echo "The file '$config_target' does not exist relative to '$config_target_base', exiting"
+        echo "Please validate IMAPFILTER_CONFIG"
+        return 1
+    fi
+
+    log_parameter=
+    if [ -n "$IMAPFILTER_LOGFILE" ]; then
+        log_parameter="-l $IMAPFILTER_LOGFILE"
+    fi
+
     (
-        if ! [ -d "$config_target_base" ]; then
-            echo "The directory '$config_target_base' does not exist, exiting"
-            echo "Please validate IMAPFILTER_CONFIG_BASE"
-            exit 1
-        fi
-
-        # Enter the basedir of the config. Required to allow relative
-        # includes in the lua scripts.
-        cd "$config_target_base"
-
-        log_parameter=
-        if [ -n "$IMAPFILTER_LOGFILE" ]; then
-                log_parameter="-l $IMAPFILTER_LOGFILE"
-        fi
-
-        if ! [ -f "$config_target" ]; then
-            echo "The file '$config_target' does not exist relative to '$config_target_base', exiting"
-            echo "Please validate IMAPFILTER_CONFIG"
-            exit 1
-        fi
-
-        imapfilter -c "$config_target" $log_parameter
-    )
+        cd "$config_target_base" || exit 1
+        exec imapfilter -c "$config_target" $log_parameter
+    ) &
+    imapfilter_pid=$!
 }
 
 imapfilter_pid=
@@ -131,8 +128,7 @@ imapfilter_restart_daemon() {
         kill -TERM "$imapfilter_pid"
         wait "$imapfilter_pid"
     fi
-    start_imapfilter &
-    imapfilter_pid="$(jobs -p)"
+    start_imapfilter || exit 1
 }
 
 loop_no_daemon() {
@@ -140,7 +136,7 @@ loop_no_daemon() {
         pull_config
 
         printf ">>> Running imapfilter\n"
-        if ! start_imapfilter; then
+        if ! start_imapfilter || ! wait "$imapfilter_pid"; then
             printf ">>> imapfilter failed\n"
             exit 1
         fi

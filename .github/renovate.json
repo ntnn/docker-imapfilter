@@ -2,12 +2,5 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>ntnn/renovate-config"
-  ],
-  "packageRules": [
-    {
-      "matchFileNames": ["imapmemserver.Dockerfile"],
-      "matchUpdateTypes": ["digest"],
-      "enabled": false
-    }
   ]
 }
